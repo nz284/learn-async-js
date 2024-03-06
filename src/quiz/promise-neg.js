@@ -1,37 +1,34 @@
-function negativeRow(arr, rowIdx) {
-    return new Promise((resolve, reject) => {
-        console.log(`Negative Row called ... `);
-        if(arr.length > rowIdx) {
-            setTimeout(() => {
-                let hasNegative = false;
-                for (let j = 0; j < arr[rowIdx].length; j++) {
-                    if(arr[rowIdx][j] < 0) {
-                        hasNegative = true;
-                    }
-                }
-                console.log(`row ${rowIdx} has negative: ${hasNegative}`);
-                resolve(hasNegative);
-            }, 0);
-        } else {
-            console.log('rejecting ... ');
-            reject(`Row ${rowIdx} does not exist in the array`);
-        }
-    });
-}
-
 const array2D = [
     [1, 2, 3],
     [4, 5, 6],
     [7, 8, -9]
 ];
 
-let negativeRowPromises = [];
+const containsNegative = (arr) => {
+    return arr.some(number => number < 0);
+};
 
-for (let i = 0; i < array2D.length; i++) {
-    negativeRowPromises.push(negativeRow(array2D, i));
-}
+// Function to check rows for negative numbers concurrently using Promises
+const logRowsWithNegativesConcurrently = (array2D) => {
+    const promises = array2D.map((row, index) => {
+        // Wrap the containsNegative check in a Promise
+        return new Promise((resolve) => {
+            if (containsNegative(row)) {
+                console.log(`Row ${index + 1} contains a negative number:`, row);
+                resolve(true);
+            } else {
+                resolve(false);
+            }
+        });
+    });
 
-Promise.all(negativeRowPromises)
-.then((results) => {
-    console.log(`Has negative: ${results.includes(true)}`);
-});
+    // Use Promise.all to execute all checks concurrently
+    return Promise.all(promises)
+        .then((results) => {
+            if (!results.some(result => result)) {
+                console.log('No rows contain negative numbers.');
+            }
+        });
+};
+
+logRowsWithNegativesConcurrently(array2D);
